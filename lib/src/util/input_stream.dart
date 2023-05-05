@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:archive/src/util/unicode_string_helper.dart';
 import 'byte_order.dart';
 
 abstract class InputStreamBase {
@@ -205,19 +206,20 @@ class InputStream extends InputStreamBase {
         }
         codes.add(c);
       }
-      return utf8 ? Utf8Decoder().convert(codes) : String.fromCharCodes(codes);
+      // return utf8 ? Utf8Decoder().convert(codes) : String.fromCharCodes(codes);
+      return ConvertBytesToString(codes, utf8: utf8);
     }
-
     final s = readBytes(size);
     final bytes = s.toUint8List();
-    try {
-      final str =
-          utf8 ? Utf8Decoder().convert(bytes) : String.fromCharCodes(bytes);
-      return str;
-    } catch (err) {
-      // If the string is not a valid UTF8 string, decode it as character codes.
-      return String.fromCharCodes(bytes);
-    }
+    // try {
+    //   final str =
+    //       utf8 ? Utf8Decoder().convert(bytes) : String.fromCharCodes(bytes);
+    //   return str;
+    // } catch (err) {
+    //   // If the string is not a valid UTF8 string, decode it as character codes.
+    //   return String.fromCharCodes(bytes);
+    // }
+    return ConvertBytesToString(bytes, utf8: utf8);
   }
 
   /// Read a 16-bit word from the stream.

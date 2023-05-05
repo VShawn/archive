@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:archive/archive_io.dart';
+import 'package:archive/src/util/unicode_string_helper.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -347,6 +348,37 @@ void main() {
       expect(arcData[i], equals(bdata.codeUnits[i]));
     }
     expect(arc[0].lastModTime, equals(1008795648));
+  });
+
+  group('zip file with unicode', () {
+    test('encode', () {
+      var zipData = ZipEncoder()
+          .encode(Archive()..addFile(ArchiveFile('文件01.txt', 1, [100])))!;
+
+      File(p.join(testDirPath, 'out/zip_encoded测试.zip'))
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(zipData);
+    });
+    test('decode', () {
+      var file = File(p.join(testDirPath, 'out/zip_encoded测试.zip'));
+      List<int> bytes = file.readAsBytesSync();
+      final archive = ZipDecoder().decodeBytes(bytes, verify: true);
+      expect(archive.length, equals(1));
+      print(archive.files[0].name);
+      expect(archive.files[0].name, equals("文件01.txt"));
+    });
+    test('decode zip by bandzip with GBK file name', () {
+      var file = File(p.join(testDirPath, 'res/zip/GBK简体中文测试.zip'));
+      List<int> bytes = file.readAsBytesSync();
+      final archive = ZipDecoder().decodeBytes(bytes, verify: true);
+      expect(archive.length, equals(1));
+      print(archive.files[0].name);
+      // expect(archive.files[0].name, equals("GBK简体中文测试.txt"));
+      final data = archive.fileData(0);
+      final ss = ConvertBytesToString(data);
+      print("Content in `GBK简体中文测试.txt`: " + ss);
+      expect(ss, equals("简体中文测试"));
+    });
   });
 
   test('zipCrypto', () {

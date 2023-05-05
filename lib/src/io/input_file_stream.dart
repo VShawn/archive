@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:enough_convert/enough_convert.dart';
 import '../util/archive_exception.dart';
 import '../util/byte_order.dart';
 import '../util/input_stream.dart';
+import '../util/unicode_string_helper.dart';
 
 class FileHandle {
   final String _path;
@@ -339,10 +341,13 @@ class InputFileStream extends InputStreamBase {
       final codes = <int>[];
       while (!isEOS) {
         var c = readByte();
+        // if (c == 0) {
+        //   return utf8
+        //       ? Utf8Decoder().convert(codes)
+        //       : String.fromCharCodes(codes);
+        // }
         if (c == 0) {
-          return utf8
-              ? Utf8Decoder().convert(codes)
-              : String.fromCharCodes(codes);
+          return ConvertBytesToString(codes, utf8: utf8);
         }
         codes.add(c);
       }
@@ -351,9 +356,10 @@ class InputFileStream extends InputStreamBase {
 
     final s = readBytes(size);
     final bytes = s.toUint8List();
-    final str =
-        utf8 ? Utf8Decoder().convert(bytes) : String.fromCharCodes(bytes);
-    return str;
+    // final str =
+    //     utf8 ? Utf8Decoder().convert(bytes) : String.fromCharCodes(bytes);
+    // return str;
+    return ConvertBytesToString(bytes, utf8: utf8);
   }
 
   void _readBuffer() {

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import '../util/archive_exception.dart';
 import '../util/input_stream.dart';
 import '../util/output_stream.dart';
+import '../util/unicode_string_helper.dart';
 
 /*  File Header (512 bytes)
  *  Offset Size Field
@@ -216,13 +217,13 @@ class TarFile {
     return x;
   }
 
-  String _parseString(InputStreamBase input, int numBytes) {
+  String _parseString(InputStreamBase input, int numBytes, {bool utf8 = true}) {
     try {
       final codes = input.readBytes(numBytes).toUint8List();
       final r = codes.indexOf(0);
       final s = codes.sublist(0, r < 0 ? null : r);
-      final str = String.fromCharCodes(s).trim();
-      return str;
+      // final str = String.fromCharCodes(s).trim();
+      return ConvertBytesToString(s, utf8: utf8).trim();
     } catch (e) {
       throw ArchiveException('Invalid Archive');
     }

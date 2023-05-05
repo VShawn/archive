@@ -41,6 +41,7 @@ class ZipDecoder {
       //dynamic content = zf.rawContent;
       var file = ArchiveFile(
           zf.filename, zf.uncompressedSize!, zf, zf.compressionMethod);
+      file.nameBytes = zfh.filenameBytes;
 
       file.mode = mode >> 16;
 

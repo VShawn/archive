@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import '../util/input_stream.dart';
 import 'zip_file.dart';
 
@@ -17,6 +18,8 @@ class ZipFileHeader {
   int? externalFileAttributes; // 4 bytes
   int? localHeaderOffset; // 4 bytes
   String filename = '';
+  // filename original bytes
+  Uint8List filenameBytes = Uint8List(0);
   List<int> extraField = [];
   String fileComment = '';
   ZipFile? file;
@@ -42,6 +45,9 @@ class ZipFileHeader {
       localHeaderOffset = input.readUint32();
 
       if (fnameLen > 0) {
+        var s = input.readBytes(fnameLen);
+        filenameBytes = s.toUint8List();
+        input.rewind(fnameLen);
         filename = input.readString(size: fnameLen);
       }
 

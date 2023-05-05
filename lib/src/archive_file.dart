@@ -11,6 +11,7 @@ class ArchiveFile {
   static const int STORE = 0;
   static const int DEFLATE = 8;
 
+  Uint8List nameBytes = Uint8List(0);
   String name;
 
   /// The uncompressed size of the file

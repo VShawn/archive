@@ -168,6 +168,27 @@ void main() {
       ..writeAsBytesSync(tar);
   });
 
+  group('tar file unicode', () {
+    test('encode', () {
+      final tar = TarEncoder()
+          .encode(Archive()..addFile(ArchiveFile('文件01.txt', 1, [100])));
+      File(p.join(testDirPath, 'out/tar_encoded测试.tar'))
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(tar);
+    });
+    test('decode', () {
+      var file = File(p.join(testDirPath, 'out/tar_encoded测试.tar'));
+      List<int> bytes = file.readAsBytesSync();
+      final archive = tar.decodeBytes(bytes, verify: true);
+
+      final expectedFiles = <File>[];
+      listDir(expectedFiles, Directory(p.join(testDirPath, 'res/test2')));
+
+      expect(archive.length, equals(1));
+      expect(archive.files[0].name, equals("文件01.txt"));
+    });
+  });
+
   test('tar file with symlink', () {
     ArchiveFile symlink = ArchiveFile('file.txt', 1, List<int>.empty())
       ..isSymbolicLink = true
